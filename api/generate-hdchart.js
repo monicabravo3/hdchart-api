@@ -4,7 +4,6 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -16,7 +15,7 @@ export default async function handler(req, res) {
   try {
     const { birthDate, birthTime, birthLocation } = req.body;
 
-    // Static chart result
+    // Safe, complete structure
     const chart = {
       type: 'Manifesting Generator',
       strategy: 'To Respond',
@@ -29,7 +28,20 @@ export default async function handler(req, res) {
       incarnationCross: 'Right Angle Cross of the Sleeping Phoenix'
     };
 
-    return res.status(200).json({ chart });
+    // Always include all fields — never leave undefined
+    const safeChart = {
+      type: chart.type || '',
+      strategy: chart.strategy || '',
+      authority: chart.authority || '',
+      profile: chart.profile || '',
+      definedCenters: Array.isArray(chart.definedCenters) ? chart.definedCenters : [],
+      undefinedCenters: Array.isArray(chart.undefinedCenters) ? chart.undefinedCenters : [],
+      gates: Array.isArray(chart.gates) ? chart.gates : [],
+      channels: Array.isArray(chart.channels) ? chart.channels : [],
+      incarnationCross: chart.incarnationCross || ''
+    };
+
+    return res.status(200).json({ chart: safeChart });
   } catch (error) {
     return res.status(500).json({
       message: 'Server error',
